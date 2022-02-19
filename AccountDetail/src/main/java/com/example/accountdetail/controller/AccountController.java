@@ -2,13 +2,11 @@ package com.example.accountdetail.controller;
 
 import com.example.accountdetail.payload.AccountResponse;
 import com.example.accountdetail.payload.CreateAccountDto;
+import com.example.accountdetail.payload.TransactionDto;
 import com.example.accountdetail.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -27,8 +25,13 @@ public class AccountController {
         return new ResponseEntity<>(accountService.createAccount(createAccountDto), HttpStatus.OK);
     }
 
-//    @PostMapping("/getAll")
-//    public ResponseEntity<PersonResponse> getUserAccounts(@Valid @RequestBody String username) {
-//        return new ResponseEntity<>(accountService.createAccount(createAccountDto), HttpStatus.OK);
-//    }
+    @PostMapping("/transact")
+    public ResponseEntity<AccountResponse> transact(@Valid @RequestBody TransactionDto transactionDto) {
+        return new ResponseEntity<>(accountService.transact(transactionDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<AccountResponse> getAccountBalance(@Valid @RequestParam Long accountNumber) {
+        return new ResponseEntity<>(accountService.getBalance(accountNumber), HttpStatus.OK);
+    }
 }

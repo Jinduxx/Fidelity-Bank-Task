@@ -1,6 +1,6 @@
-package com.example.appuser.payload;
+package com.example.accountdetail.payload;
 
-import com.example.appuser.model.BankAccount;
+import com.example.accountdetail.model.BankAccount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

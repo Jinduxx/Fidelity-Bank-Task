@@ -3,6 +3,8 @@ package com.example.appuser.service;
 import com.example.appuser.model.BankAccount;
 import com.example.appuser.payload.*;
 
+import java.util.List;
+
 public interface PersonService {
 
 
@@ -12,5 +14,7 @@ public interface PersonService {
 
     PersonResponse getUser(String username);
 
-    PersonResponse addNewAccount(AddAccountDto addAccountDto);
+    PersonResponse updateUserAccount(AddAccountDto addAccountDto);
+
+    List<AccountResponseDto> getUserAccounts(String username);
 }

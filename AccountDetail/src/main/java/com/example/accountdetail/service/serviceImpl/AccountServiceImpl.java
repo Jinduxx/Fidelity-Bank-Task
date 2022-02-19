@@ -1,9 +1,8 @@
 package com.example.accountdetail.service.serviceImpl;
 
+import com.example.accountdetail.enumeration.TRANSACTION_TYPE;
 import com.example.accountdetail.model.BankAccount;
-import com.example.accountdetail.payload.AccountResponse;
-import com.example.accountdetail.payload.CreateAccountDto;
-import com.example.accountdetail.payload.UserResponseDto;
+import com.example.accountdetail.payload.*;
 import com.example.accountdetail.repository.AccountRepository;
 import com.example.accountdetail.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
+import java.nio.channels.NotYetBoundException;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse createAccount(CreateAccountDto createAccountDto) {
 
-        UserResponseDto response = restTemplate.getForObject("http://localhost:8082/person/getPerson/" + createAccountDto.getUserName(), UserResponseDto.class);
+        final String userName = createAccountDto.getUserName();
+        UserResponseDto response = restTemplate.getForObject("http://localhost:8091/person/getPerson/" + userName, UserResponseDto.class);
 
         if (response == null) {
             throw new NullPointerException("User Not Found");
@@ -35,29 +38,87 @@ public class AccountServiceImpl implements AccountService {
 
         BankAccount request = new BankAccount();
         request.setAccount_type(createAccountDto.getAccount_type());
-        request.setAccountNumber(generateAccountNumber());
         request.setPin(1234L);
         request.setAccountBalance(BigDecimal.valueOf(0));
+        Long accountNumber = generateAccountNumber();
+        while (!isUnique(accountNumber)) {
+            accountNumber = generateAccountNumber();
+        }
+        request.setAccountNumber(accountNumber);
 
         BankAccount bankAccount = accountRepository.save(request);
 
-        UserResponseDto responseDto = restTemplate.postForObject("http://localhost:8082/person/update", bankAccount, UserResponseDto.class);
-        return null;
+        AddAccountDto addAccountDto = new AddAccountDto();
+        addAccountDto.setBankAccount(bankAccount);
+        addAccountDto.setUsername(userName);
+        updateAccount(addAccountDto);
+
+        return modelMapper.map(bankAccount, AccountResponse.class);
     }
 
     public Long generateAccountNumber() {
-        return 1234567890L;
-//        Random random = new Random();
-//        return (long) (random.nextInt(10000));
+        Random random = new Random();
+        StringBuilder newAccountNumber = new StringBuilder();
+
+        while (newAccountNumber.length() < 11) {
+            int a = random.nextInt(10000000) + 1;
+            newAccountNumber.append(a);
+            }
+        return Long.valueOf(newAccountNumber.toString());
     }
 
-//    @Override
-//    public Optional<CreateUserDto> getUserAccounts(String account_no) {
-//
-//        // rest call to retreive user
-//
-//        return getUserAccounts();
-//
-//        return Optional.empty();
-//    }
+    public Boolean isUnique(Long accountNumber) {
+        Optional<BankAccount> bankAccount = accountRepository.findByAccountNumber(accountNumber);
+        return bankAccount.isEmpty();
+    }
+
+    @Override
+    public AccountResponse transact(TransactionDto transactionDto) {
+
+        final String userName = transactionDto.getUserName();
+        UserResponseDto response = restTemplate.getForObject("http://localhost:8091/person/getPerson/" + userName, UserResponseDto.class);
+
+        if (response == null) {
+            throw new NullPointerException("User Not Found");
+        }
+
+        Optional<BankAccount> account = accountRepository.findByAccountNumber(transactionDto.getAccountNumber());
+
+        if (account.isEmpty()) {
+            throw new NullPointerException("Account Not Found");
+        }
+
+        if (transactionDto.getAmount().compareTo(account.get().getAccountBalance()) > 0) {
+            throw new NullPointerException("Insufficient balance to carry out transaction");
+        }
+
+        if (TRANSACTION_TYPE.CREDIT.equals(transactionDto.getTransactionType())) {
+            account.get().setAccountBalance(account.get().getAccountBalance().add(transactionDto.getAmount()));
+        } else {
+            account.get().setAccountBalance(account.get().getAccountBalance().subtract(transactionDto.getAmount()));
+        }
+
+        BankAccount bankAccount = accountRepository.save(account.get());
+
+        AddAccountDto addAccountDto = new AddAccountDto();
+        addAccountDto.setBankAccount(bankAccount);
+        addAccountDto.setUsername(userName);
+        updateAccount(addAccountDto);
+
+        return modelMapper.map(bankAccount, AccountResponse.class);
+    }
+
+    @Override
+    public AccountResponse getBalance(Long accountNumber) {
+        Optional<BankAccount> account = accountRepository.findByAccountNumber(accountNumber);
+
+        if (account.isEmpty()) {
+            throw new NullPointerException("Account not found");
+        }
+        return modelMapper.map(account.get(), AccountResponse.class);
+    }
+
+    private void updateAccount(AddAccountDto addAccountDto) {
+        restTemplate.put("http://localhost:8091/person/account/update", addAccountDto);
+    }
 }

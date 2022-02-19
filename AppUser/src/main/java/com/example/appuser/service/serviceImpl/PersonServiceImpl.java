@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -110,13 +111,33 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public PersonResponse addNewAccount(AddAccountDto addAccountDto) {
+    public PersonResponse updateUserAccount(AddAccountDto addAccountDto) {
         Optional<Person> person = personRepository.findByUsername(addAccountDto.getUsername());
 
         if (person.isEmpty())
             return null;
-        else
-            person.get().getAccounts().add(addAccountDto.getBankAccount());
-            return modelMapper.map(personRepository.save(person.get()), PersonResponse.class);
+
+        List<BankAccount> accounts = person.get().getAccounts();
+
+        if (!accounts.contains(addAccountDto.getBankAccount())) {
+            accounts.add(addAccountDto.getBankAccount());
+        } else {
+            accounts.stream().filter(account -> account.getAccountNumber().equals(addAccountDto.getBankAccount().getAccountNumber()))
+                    .findAny()
+                    .ifPresent(account -> modelMapper.map(addAccountDto.getBankAccount(), BankAccount.class));
+        }
+        return modelMapper.map(personRepository.save(person.get()), PersonResponse.class);
+    }
+
+    @Override
+    public List<AccountResponseDto> getUserAccounts(String username) {
+        Optional<Person> person = personRepository.findByUsername(username);
+
+        if (person.isEmpty())
+            throw new NullPointerException();
+        else {
+            List<BankAccount> bankAccounts = person.get().getAccounts();
+            return bankAccounts.stream().map(account -> modelMapper.map(account, AccountResponseDto.class)).collect(Collectors.toList());
+        }
     }
 }
