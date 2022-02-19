@@ -1,0 +1,22 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8010/eureka
+#    devtools:
+#        restart:
+#            enabled: true
+#    instance:
+#        instance-id: ${spring.application.name}:${spring.application.instance.instance_id:${random.value}}
+server:
+    port: 8083
+
+spring:
+    application:
+        name: userservices
+    datasource:
+        password: Thewipper.
+        url: jdbc:postgresql://localhost:5433/fidelity
+        username: postgres
+    jpa:
+        hibernate:
+            ddl-auto: update

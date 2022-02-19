@@ -1,0 +1,28 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8010/eureka
+
+server:
+    port: 8082
+
+spring:
+    main:
+        web-application-type: reactive
+
+    application:
+        name: api-gateway
+    cloud:
+        gateway:
+            routes:
+                - id: userservicess
+                  uri: lb://USERSERVICES
+                  predicates:
+                      - Path=/person/**
+
+                - id: accountservicess
+                  uri: lb://ACCOUNTSERVICES
+                  predicates:
+                      - Path=/account/**
+
+
