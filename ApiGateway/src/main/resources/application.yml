@@ -25,4 +25,10 @@ spring:
                   predicates:
                       - Path=/account/**
 
+                - id: transactionservicess
+                  uri: lb://TRANSACTIONSERVICES
+                  predicates:
+                      - Path=/transaction/**
+
+
 

@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse transact(TransactionDto transactionDto) {
 
         final String userName = transactionDto.getUserName();
-        UserResponseDto response = restTemplate.getForObject("http://localhost:8091/person/getPerson/" + userName, UserResponseDto.class);
+        UserResponseDto response = restTemplate.getForObject("http://localhost:8091/person/get/" + userName, UserResponseDto.class);
 
         if (response == null) {
             throw new NullPointerException("User Not Found");
@@ -88,13 +88,12 @@ public class AccountServiceImpl implements AccountService {
             throw new NullPointerException("Account Not Found");
         }
 
-        if (transactionDto.getAmount().compareTo(account.get().getAccountBalance()) > 0) {
-            throw new NullPointerException("Insufficient balance to carry out transaction");
-        }
-
         if (TRANSACTION_TYPE.CREDIT.equals(transactionDto.getTransactionType())) {
             account.get().setAccountBalance(account.get().getAccountBalance().add(transactionDto.getAmount()));
         } else {
+            if (transactionDto.getAmount().compareTo(account.get().getAccountBalance()) > 0) {
+                throw new NullPointerException("Insufficient balance to carry out transaction");
+            }
             account.get().setAccountBalance(account.get().getAccountBalance().subtract(transactionDto.getAmount()));
         }
 

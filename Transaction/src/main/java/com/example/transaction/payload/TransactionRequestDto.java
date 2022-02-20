@@ -1,6 +1,7 @@
-package com.example.accountdetail.payload;
+package com.example.transaction.payload;
 
-import com.example.accountdetail.enumeration.TRANSACTION_TYPE;
+import com.example.transaction.enumerated.TRANSACTION_TYPE;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,9 +9,9 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class TransactionDto {
+@AllArgsConstructor
+public class TransactionRequestDto {
 
     private BigDecimal amount;
     private Long accountNumber;
