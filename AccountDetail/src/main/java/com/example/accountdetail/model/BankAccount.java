@@ -1,6 +1,5 @@
 package com.example.accountdetail.model;
 
-import com.example.accountdetail.enumeration.ACCOUNT_STATUS;
 import com.example.accountdetail.enumeration.ACCOUNT_TYPE;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
@@ -10,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Entity
@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Setter
-public class BankAccount {
+public class BankAccount extends AuditEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

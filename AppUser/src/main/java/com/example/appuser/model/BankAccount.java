@@ -1,18 +1,17 @@
 package com.example.appuser.model;
 
-import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "banking_core_account")
-public class BankAccount {
+public class BankAccount extends AuditEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
