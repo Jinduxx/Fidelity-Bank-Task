@@ -1,6 +1,6 @@
 package com.example.appuser.service.serviceImpl;
 
-import com.example.appuser.exception.CustomServiceExceptions;
+import com.example.appuser.exception.PersonException;
 import com.example.appuser.model.BankAccount;
 import com.example.appuser.model.Person;
 import com.example.appuser.payload.*;
@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,8 +65,8 @@ public class PersonServiceImpl implements PersonService {
             res.setToken(jwt);
             res.setRole(role);
             return res;
-        } catch (Exception e) {
-            throw new Exception("incorrect username or password!", e);
+        } catch (PersonException e) {
+            throw new PersonException ("incorrect username or password!");
         }
     }
 
@@ -75,18 +74,18 @@ public class PersonServiceImpl implements PersonService {
     public PersonResponse register(PersonRequest personRequest) {
         boolean isValidEmail = emailValidator.test(personRequest.getEmail());
         if(!isValidEmail){
-            throw new CustomServiceExceptions("Not a valid email");
+            throw new PersonException("Not a valid email");
         }
 
         boolean isValidNumber = emailValidator.validatePhoneNumber(personRequest.getPhoneNumber());
 
         if(!isValidNumber){
-            throw new CustomServiceExceptions("Not a valid phone number");
+            throw new PersonException("Not a valid phone number");
         }
 
         boolean userExists = personRepository.findByEmail(personRequest.getEmail()).isPresent();
         if(userExists){
-            throw  new CustomServiceExceptions("email taken");
+            throw  new PersonException("email taken");
         }
 
         Person person = new Person();
@@ -134,7 +133,7 @@ public class PersonServiceImpl implements PersonService {
         Optional<Person> person = personRepository.findByUsername(username);
 
         if (person.isEmpty())
-            throw new NullPointerException();
+            throw new PersonException("Person not Found");
         else {
             List<BankAccount> bankAccounts = person.get().getAccounts();
             return bankAccounts.stream().map(account -> modelMapper.map(account, AccountResponseDto.class)).collect(Collectors.toList());

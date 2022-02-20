@@ -1,22 +1,19 @@
 package com.example.accountdetail.service.serviceImpl;
 
 import com.example.accountdetail.enumeration.TRANSACTION_TYPE;
+import com.example.accountdetail.exception.AccountException;
 import com.example.accountdetail.model.BankAccount;
 import com.example.accountdetail.payload.*;
 import com.example.accountdetail.repository.AccountRepository;
 import com.example.accountdetail.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
-import java.nio.channels.NotYetBoundException;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -79,20 +76,20 @@ public class AccountServiceImpl implements AccountService {
         UserResponseDto response = restTemplate.getForObject("http://localhost:8091/person/get/" + userName, UserResponseDto.class);
 
         if (response == null) {
-            throw new NullPointerException("User Not Found");
+            throw new AccountException("User Not Found");
         }
 
         Optional<BankAccount> account = accountRepository.findByAccountNumber(transactionDto.getAccountNumber());
 
         if (account.isEmpty()) {
-            throw new NullPointerException("Account Not Found");
+            throw new AccountException("Account Not Found");
         }
 
         if (TRANSACTION_TYPE.CREDIT.equals(transactionDto.getTransactionType())) {
             account.get().setAccountBalance(account.get().getAccountBalance().add(transactionDto.getAmount()));
         } else {
             if (transactionDto.getAmount().compareTo(account.get().getAccountBalance()) > 0) {
-                throw new NullPointerException("Insufficient balance to carry out transaction");
+                throw new AccountException("Insufficient balance to carry out transaction");
             }
             account.get().setAccountBalance(account.get().getAccountBalance().subtract(transactionDto.getAmount()));
         }
