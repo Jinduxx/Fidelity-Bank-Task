@@ -12,6 +12,5 @@ import java.math.BigDecimal;
 public class AccountResponse {
 
     private Long accountNumber;
-
     private BigDecimal accountBalance;
 }

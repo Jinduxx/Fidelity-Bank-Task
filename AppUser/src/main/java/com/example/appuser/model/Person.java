@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Person extends AuditEntity implements Serializable {
+public class Person extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

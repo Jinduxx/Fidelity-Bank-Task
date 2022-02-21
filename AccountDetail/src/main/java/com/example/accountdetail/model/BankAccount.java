@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Setter
-public class BankAccount extends AuditEntity implements Serializable {
+public class BankAccount extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
